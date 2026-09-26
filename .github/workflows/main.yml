@@ -22,7 +22,7 @@ jobs:
           channel: 'stable'
 
       - name: Recreate Android Project Setup
-        run: flutter create . --platforms android --org com.example.k
+        run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
       - name: Install Dependencies
         run: flutter pub get
@@ -35,4 +35,3 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
-
