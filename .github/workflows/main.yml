@@ -24,10 +24,19 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Force Android SDK 36
+      - name: Permanently Override SDK 36 for All Plugins
         run: |
-          find android/ -name "build.gradle*" -exec sed -i 's/compileSdk = .*/compileSdk = 36/g' {} +
-          find android/ -name "build.gradle*" -exec sed -i 's/compileSdkVersion .*/compileSdkVersion 36/g' {} +
+          cat << 'EOF' >> android/build.gradle
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion 36
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Install Dependencies
         run: flutter pub get
