@@ -24,44 +24,23 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Inject Android SDK 36 Override Globally
+      - name: Inject SDK 36 Globally Across All Modules
         run: |
           echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          
+          # Patch app-level build.gradle.kts
           sed -i 's/compileSdk = .*/compileSdk = 36/' android/app/build.gradle.kts
           
-          cat << 'EOF' > android/build.gradle.kts
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
+          # Append universal resolution strategy for all subprojects/plugins
+          cat << 'EOF' >> android/app/build.gradle.kts
 
-          val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
-          rootProject.layout.buildDirectory.value(newBuildDir)
-
-          subprojects {
-              val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-              project.layout.buildDirectory.value(newSubprojectBuildDir)
-          }
-
-          subprojects {
-              project.evaluationDependsOn(":app")
-          }
-
-          tasks.register<Delete>("clean") {
-              delete(rootProject.layout.buildDirectory)
-          }
-
-          subprojects {
-              plugins.withId("com.android.library") {
-                  configure<com.android.build.gradle.LibraryExtension> {
-                      compileSdk = 36
-                  }
-              }
-              plugins.withId("com.android.application") {
-                  configure<com.android.build.gradle.AppExtension> {
-                      compileSdk = 36
+          gradle.projectsEvaluated {
+              subprojects {
+                  if (project.hasProperty("android")) {
+                      val android = project.extensions.findByName("android")
+                      if (android is com.android.build.gradle.BaseExtension) {
+                          android.compileSdkVersion(36)
+                      }
                   }
               }
           }
