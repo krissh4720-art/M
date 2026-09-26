@@ -24,18 +24,44 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Force SDK 36 across App & Dependencies
+      - name: Inject Android SDK 36 Override Globally
         run: |
           echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
           sed -i 's/compileSdk = .*/compileSdk = 36/' android/app/build.gradle.kts
-          cat << 'EOF' >> android/build.gradle.kts
+          
+          cat << 'EOF' > android/build.gradle.kts
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+          rootProject.layout.buildDirectory.value(newBuildDir)
 
           subprojects {
-              afterEvaluate {
-                  if (plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")) {
-                      configure<com.android.build.gradle.BaseExtension> {
-                          compileSdkVersion(36)
-                      }
+              val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
+              project.layout.buildDirectory.value(newSubprojectBuildDir)
+          }
+
+          subprojects {
+              project.evaluationDependsOn(":app")
+          }
+
+          tasks.register<Delete>("clean") {
+              delete(rootProject.layout.buildDirectory)
+          }
+
+          subprojects {
+              plugins.withId("com.android.library") {
+                  configure<com.android.build.gradle.LibraryExtension> {
+                      compileSdk = 36
+                  }
+              }
+              plugins.withId("com.android.application") {
+                  configure<com.android.build.gradle.AppExtension> {
+                      compileSdk = 36
                   }
               }
           }
