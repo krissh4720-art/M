@@ -1,37 +1,37 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package0:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const KApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class KApp extends StatelessWidget {
+  const KApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PDF Reader',
+      title: 'K',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E88E5)),
       ),
-      home: const HomePage(),
+      home: const KHomePage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class KHomePage extends StatefulWidget {
+  const KHomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<KHomePage> createState() => _KHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _KHomePageState extends State<KHomePage> {
   File? _pdfFile;
 
   Future<void> _pickPDF() async {
@@ -47,9 +47,11 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening file: $e')),
+        );
+      }
     }
   }
 
@@ -57,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF Reader', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('K PDF Reader', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.folder_open),
@@ -66,7 +68,13 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: _pdfFile != null
-          ? SfPdfViewer.file(_pdfFile!)
+          ? PDFView(
+              filePath: _pdfFile!.path,
+              enableSwipe: true,
+              swipeHorizontal: false,
+              autoSpacing: true,
+              pageFling: true,
+            )
           : Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
