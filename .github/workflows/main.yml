@@ -24,15 +24,15 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Configure Android Build Properties
+      - name: Patch Android build.gradle.kts to compileSdk 36
         run: |
-          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          sed -i 's/compileSdk = .*/compileSdk = 36/' android/app/build.gradle.kts
 
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --build-setting compileSdkVersion=36
+        run: flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
