@@ -24,9 +24,9 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Set Android Compile SDK Version
+      - name: Set Android Compile SDK Version to 36
         run: |
-          sed -i 's/compileSdk = .*/compileSdk = 35/' android/app/build.gradle.kts || sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle
+          sed -i 's/compileSdk = .*/compileSdk = 36/' android/app/build.gradle.kts || sed -i 's/compileSdkVersion .*/compileSdkVersion 36/' android/app/build.gradle
 
       - name: Install Dependencies
         run: flutter pub get
