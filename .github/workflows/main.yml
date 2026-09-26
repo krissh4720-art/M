@@ -24,9 +24,22 @@ jobs:
       - name: Recreate Android Project Setup
         run: flutter create . --platforms android --project-name k_pdf_reader --org com.example.k
 
-      - name: Patch Android build.gradle.kts to compileSdk 36
+      - name: Force SDK 36 across App & Dependencies
         run: |
+          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
           sed -i 's/compileSdk = .*/compileSdk = 36/' android/app/build.gradle.kts
+          cat << 'EOF' >> android/build.gradle.kts
+
+          subprojects {
+              afterEvaluate {
+                  if (plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")) {
+                      configure<com.android.build.gradle.BaseExtension> {
+                          compileSdkVersion(36)
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Install Dependencies
         run: flutter pub get
